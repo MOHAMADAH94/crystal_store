@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}الرئيسية{% endblock %}
+
+{% block contents %}
+
+<!-- Full Width Hero with Split Design -->
+<section class="modern-hero-section">
+  <div class="container-fluid px-0">
+    <div class="row g-0">
+      <!-- Left Side - Text Content -->
+      <div class="col-lg-6 modern-hero-content">
+        <div class="hero-inner">
+          <div class="hero-badge">
+            <i class="fas fa-sparkles me-2"></i>
+            <span>متجرك الرقمي المفضل</span>
+          </div>
+          <h1 class="modern-hero-title">
+            <span class="gradient-text">Crystal</span>
+            <br>
+            <span class="hero-subtitle-text">العالم الرقمي بين يديك</span>
+          </h1>
+          <p class="modern-hero-description">
+            نقدم لك أفضل خدمات الشحن الرقمي والبطاقات والاشتراكات بأعلى معايير الجودة والأمان
+          </p>
+          <div class="hero-actions">
+            <a href="{% url 'products' %}" class="btn-modern-primary">
+              <span>تصفح المنتجات</span>
+              <i class="fas fa-arrow-left ms-2"></i>
+            </a>
+            <a href="{% url 'about' %}" class="btn-modern-outline">
+              <span>اعرف المزيد</span>
+            </a>
+          </div>
+          <div class="hero-stats">
+            <div class="stat-item">
+              <div class="stat-number">1000+</div>
+              <div class="stat-label">منتج متاح</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">24/7</div>
+              <div class="stat-label">دعم فني</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">5%</div>
+              <div class="stat-label">خصم حصري</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Right Side - Visual -->
+      <div class="col-lg-6 modern-hero-visual">
+        <div class="hero-visual-inner">
+          <div class="floating-card card-1">
+            <i class="fas fa-gamepad"></i>
+            <span>ألعاب</span>
+          </div>
+          <div class="floating-card card-2">
+            <i class="fas fa-mobile-alt"></i>
+            <span>تطبيقات</span>
+          </div>
+          <div class="floating-card card-3">
+            <i class="fas fa-credit-card"></i>
+            <span>بطاقات</span>
+          </div>
+          <div class="hero-gradient-orb orb-1"></div>
+          <div class="hero-gradient-orb orb-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Categories Section - Modern Grid -->
+<section class="modern-categories-section py-5">
+  <div class="container">
+    <div class="section-header-modern text-center mb-5">
+      <h2 class="section-title-modern">
+        <span class="title-icon"><i class="fas fa-th-large"></i></span>
+        <span>تصفح الفئات</span>
+      </h2>
+      <p class="section-subtitle">اختر الفئة التي تهمك</p>
+    </div>
+    
+    <div class="categories-grid">
+      {% if categories %}
+        {% for category in categories %}
+        <div class="category-card-modern">
+          <a href="{% url 'products' %}?category={{ category.id }}" class="category-link-modern">
+            <div class="category-image-wrapper">
+              {% if category.image %}
+                <img src="{{ category.image.url }}" alt="{{ category.name }}" class="category-image">
+              {% else %}
+                <div class="category-placeholder">
+                  <i class="fas fa-folder-open"></i>
+                </div>
+              {% endif %}
+              <div class="category-overlay">
+                <i class="fas fa-arrow-left"></i>
+              </div>
+            </div>
+            <div class="category-info">
+              <h3 class="category-name">{{ category.name }}</h3>
+              <span class="category-cta">استكشف <i class="fas fa-chevron-left"></i></span>
+            </div>
+          </a>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Latest Products - Masonry Style -->
+<section class="modern-products-section py-5">
+  <div class="container">
+    <div class="section-header-modern text-center mb-5">
+      <h2 class="section-title-modern">
+        <span class="title-icon"><i class="fas fa-fire"></i></span>
+        <span>أحدث المنتجات</span>
+      </h2>
+      <p class="section-subtitle">اكتشف أحدث الإضافات إلى مجموعتنا</p>
+    </div>
+    
+    <div class="products-masonry">
+      {% if products %}
+        {% for product in products|slice:":12"|dictsortreversed:"created_at" %}
+        <div class="product-item-modern {% if not product.is_active %}disabled{% endif %}">
+          <a href="{% url 'products_and_packages' product.id %}" class="product-link-modern">
+            <div class="product-image-container">
+              <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image-modern">
+              {% if not product.is_active %}
+                <div class="product-unavailable">
+                  <span>غير متوفر</span>
+                </div>
+              {% endif %}
+              <div class="product-hover-effect">
+                <i class="fas fa-eye"></i>
+                <span>عرض التفاصيل</span>
+              </div>
+            </div>
+            <div class="product-content-modern">
+              <h4 class="product-name-modern">{{ product.name }}</h4>
+              <div class="product-action-modern">
+                <span>عرض الباقات</span>
+                <i class="fas fa-arrow-left"></i>
+              </div>
+            </div>
+          </a>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <i class="fas fa-inbox"></i>
+          <h3>لا توجد منتجات متاحة حالياً</h3>
+        </div>
+      {% endif %}
+    </div>
+    
+    <div class="text-center mt-5">
+      <a href="{% url 'products' %}" class="btn-modern-primary btn-large">
+        <span>عرض جميع المنتجات</span>
+        <i class="fas fa-arrow-left ms-2"></i>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Features - Card Style -->
+<section class="modern-features-section py-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card-modern">
+          <div class="feature-icon-modern">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <h3 class="feature-title-modern">خدمة فورية</h3>
+          <p class="feature-text-modern">شحن فوري بعد التأكد من الدفع مع إشعارات مباشرة</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card-modern">
+          <div class="feature-icon-modern">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h3 class="feature-title-modern">آمن وسري</h3>
+          <p class="feature-text-modern">معاملات آمنة بنظام حماية متكامل وخصوصية تامة</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card-modern">
+          <div class="feature-icon-modern">
+            <i class="fas fa-percentage"></i>
+          </div>
+          <h3 class="feature-title-modern">خصومات حصرية</h3>
+          <p class="feature-text-modern">خصومات تصل إلى 5% للعملاء الدائمين</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section - Modern Design -->
+<section class="modern-cta-section">
+  <div class="container">
+    <div class="cta-content-modern">
+      <h2 class="cta-title-modern">جاهز للبدء؟</h2>
+      <p class="cta-description-modern">سجل الآن واحصل على خصومات مميزة وخدمة استثنائية</p>
+      <a href="{% url 'products' %}" class="btn-modern-cta">
+        <span>ابدأ التسوق الآن</span>
+        <i class="fas fa-shopping-cart ms-2"></i>
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

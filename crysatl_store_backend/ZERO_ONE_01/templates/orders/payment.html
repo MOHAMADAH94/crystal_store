@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}الدفع{% endblock %}
+
+{% block contents %}
+<div class="container my-5 p-5 border border-primary rounded shadow" style="background-color: var(--bg-card);">
+
+    <h2 class="text-center mb-4" style="color: var(--accent-cyan);" >
+        💳 الدفع
+    </h2>
+    <hr class="border border-2 opacity-75" style="border-color: var(--silver-light) !important;">
+
+    {% include 'partials/_alerts.html' %}
+
+    {% if order %}
+    <form method="POST" novalidate>
+        {% csrf_token %}
+
+        {% if balance >= final_total %}
+            <div class="alert alert-success text-center fw-bold" >
+                ✅ رصيدك يمكنك من إتمام هذه العملية
+            </div>
+        {% else %}
+            <div class="alert alert-danger text-center fw-bold" >
+                ❌ ليس لديك رصيد كاف لإتمام العملية
+            </div>
+        {% endif %}
+
+
+
+        <h4 class="fw-bold mb-3" style="color: var(--accent-cyan);" >تفاصيل الطلب</h4>
+
+        <ul class="list-group mb-4">
+            {% for detail in order_details %}
+                <li class="list-group-item border mb-2" style="background-color: var(--bg-secondary); border-color: var(--silver-light) !important;">
+                    <div><strong style="color: var(--accent-cyan);" >الباقة:</strong> <span style="color: var(--text-primary);">{{ detail.Package.name }}</span></div>
+                    <div><strong style="color: var(--accent-cyan);" >السعر:</strong> <span style="color: var(--accent-gold);">${{ detail.price|floatformat:4 }}</span></div>
+                    <div><strong style="color: var(--accent-cyan);" >الكمية:</strong> <span style="color: var(--text-primary);">{{ detail.quantity }}</span></div>
+                    <div><strong style="color: var(--accent-cyan);" >معرّف اللاعب:</strong> <span style="color: var(--text-primary);">{{ detail.gamer_id }}</span></div>
+                    <div><strong style="color: var(--accent-cyan);" >الحالة:</strong> <span style="color: var(--text-primary);">{{ detail.status }}</span></div>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <div class="p-4 rounded border mb-4" style="background-color: var(--bg-secondary); border-color: var(--silver-light) !important;">
+            <p class="mb-1"><strong style="color: var(--accent-cyan);" >المجموع النهائي:</strong> <span style="color: var(--accent-gold);">${{ final_total|floatformat:4 }}</span></p>
+            <p class="mb-0"><strong style="color: var(--accent-cyan);" >الرصيد المتاح:</strong> <span style="color: var(--accent-gold);">${{ balance|floatformat:4 }}</span></p>
+        </div>
+
+        <div class="text-center">
+            {% if balance >= final_total %}
+                <button type="submit" name="btnPayment" class="btn btn-primary px-5 fw-bold" >
+                    <i class="fas fa-check-circle me-2"></i> تأكيد الدفع
+                </button>
+            {% else %}
+                <button type="submit" name="btnPayment" class="btn btn-secondary px-5 fw-bold" disabled >
+                    <i class="fas fa-ban me-2"></i> تأكيد الدفع
+                </button>
+            {% endif %}
+        </div>
+    </form>
+
+    {% else %}
+    <div class="alert alert-primary text-center" >
+        لا يوجد طلبات حالياً.
+        <div class="mt-3">
+            <a href="{% url 'show_orders' %}" class="btn btn-outline-primary" >
+                <i class="fas fa-list me-2"></i> عرض جميع الطلبات
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

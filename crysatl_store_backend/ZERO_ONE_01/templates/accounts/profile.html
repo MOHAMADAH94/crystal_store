@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}الملف الشخصي{% endblock %}
+
+{% block contents %}
+<div class="my-form container p-5 my-5 rounded border border-primary shadow-sm">
+    <h2 class="text-center mb-4" style="color: var(--accent-cyan); font-weight: bold;">👤 الملف الشخصي</h2>
+    <hr style="border-color: var(--silver-light);">
+
+    {% if request.user.is_authenticated %}
+    <form method="POST">
+        {% csrf_token %}
+        {% include 'partials/_alerts.html' %}
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="inputFirstName" style="color: var(--accent-cyan);">الاسم الأول</label>
+                <input type="text" class="form-control border-primary"name="fname" id="inputFirstName" required value="{{ fname }}">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="inputLastName" style="color: var(--accent-cyan);">الاسم الأخير</label>
+                <input type="text" class="form-control border-primary"name="lname" id="inputLastName" required value="{{ lname }}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="inputAddress" style="color: var(--accent-cyan);">العنوان الرئيسي</label>
+            <input type="text" class="form-control border-primary"name="address" id="inputAddress" required value="{{ address }}">
+        </div>
+
+        <div class="form-group">
+            <label for="inputAddress2" style="color: var(--accent-cyan);">العنوان الثانوي</label>
+            <input type="text" class="form-control border-primary"name="address2" id="inputAddress2" value="{{ address2 }}">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label for="inputCity" style="color: var(--accent-cyan);">المدينة</label>
+                <input type="text" class="form-control border-primary"name="city" id="inputCity" required value="{{ city }}">
+            </div>
+            <div class="form-group col-md-4">
+                <label for="inputState" style="color: var(--accent-cyan);">المحافظة</label>
+                <input type="text" class="form-control border-primary"name="state" id="inputState" required value="{{ state }}">
+            </div>
+            <div class="form-group col-md-4">
+                <label for="inputPhone" style="color: var(--accent-cyan);">رقم الهاتف</label>
+                <input type="tel" class="form-control border-primary"name="phone" id="inputPhone" required value="{{ phone }}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="inputEmail" style="color: var(--accent-cyan);">البريد الإلكتروني</label>
+            <input type="email" readonly class="form-control-plaintext" name="email" id="inputEmail" value="{{ email }}" style="color: var(--text-muted); background-color: var(--bg-secondary);">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="inputUsername" style="color: var(--accent-cyan);">اسم المستخدم</label>
+                <input type="text" readonly class="form-control-plaintext" name="username" id="inputUsername" value="{{ username }}" style="color: var(--text-muted); background-color: var(--bg-secondary);">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="inputPassword" style="color: var(--accent-cyan);">كلمة المرور</label>
+                <input type="password" class="form-control border-primary"name="password" id="inputPassword" required value="{{ password }}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="inputBalance" style="color: var(--accent-cyan);">الرصيد</label>
+                <input type="text" readonly class="form-control-plaintext" name="balance" id="inputBalance" value="{{ balance }}" style="color: var(--accent-gold); background-color: var(--bg-secondary);">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="inputLevel" style="color: var(--accent-cyan);">المستوى</label>
+                <input type="text" readonly class="form-control-plaintext" name="level" id="inputLevel" value="{{ level }}" style="color: var(--text-muted); background-color: var(--bg-secondary);">
+            </div>
+        </div>
+
+        <button type="submit" name="btnsave" class="btn btn-primary mt-3">
+            💾 حفظ التغييرات
+        </button>
+
+    </form>
+    {% else %}
+    <div class="alert alert-info text-center">
+        يجب تسجيل الدخول لعرض الملف الشخصي. <a href="{% url 'signin' %}" class="font-weight-bold">سجل الدخول الآن</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .form-control:focus {
+        border-color: var(--accent-cyan);
+        box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.25);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} الطلبات {% endblock %}
+
+{% block contents %}
+<div class="my-form container p-5 my-5 rounded" style="background-color: var(--bg-card); border: 1px solid var(--silver-light);">
+  <h2 class="text-center mb-4" style="color: var(--accent-cyan);" >الطلبات</h2>
+  <hr style="border-color: var(--silver-light);">
+
+  <!-- فلتر الحالة -->
+  <form method="get" class="text-center mb-4">
+    <div class="form-group d-inline-block w-50">
+      <label for="filterSelect" class="form-label fw-bold" style="color: var(--text-primary);" >اختر حالة الطلب:</label>
+      <select name="filter" id="filterSelect" class="form-control border-primary" onchange="this.form.submit();">
+        <option value="all" {% if request.GET.filter == "all" %}selected{% endif %}>الكل</option>
+        <option value="done" {% if request.GET.filter == "done" %}selected{% endif %}>مكتمل</option>
+        <option value="pending" {% if request.GET.filter == "pending" %}selected{% endif %}>قيد المعالجة</option>
+        <option value="rejected" {% if request.GET.filter == "rejected" %}selected{% endif %}>مرفوض</option>
+      </select>
+
+    </div>
+  </form>
+
+  {% include 'partials/_alerts.html' %}
+
+  {% if all_orders %}
+  <div class="table-responsive">
+    <table class="table table-bordered text-center shadow-sm" style="background-color: var(--bg-card) !important;">
+      <thead class="table-primary" style="background-color: var(--bg-tertiary) !important;">
+        <tr style="color: var(--accent-cyan) !important; background-color: var(--bg-tertiary) !important;">
+          <th style="background-color: var(--bg-tertiary) !important; color: var(--accent-cyan) !important; border-color: var(--silver-light) !important;">#</th>
+          <th style="background-color: var(--bg-tertiary) !important; color: var(--accent-cyan) !important; border-color: var(--silver-light) !important;">اسم الباقة</th>
+          <th style="background-color: var(--bg-tertiary) !important; color: var(--accent-cyan) !important; border-color: var(--silver-light) !important;">معرّف اللاعب</th>
+          <th style="background-color: var(--bg-tertiary) !important; color: var(--accent-cyan) !important; border-color: var(--silver-light) !important;"> الكمية</th>
+          <th style="background-color: var(--bg-tertiary) !important; color: var(--accent-cyan) !important; border-color: var(--silver-light) !important;">التاريخ</th>
+          <!-- <th>منفذ؟</th> -->
+          <th style="background-color: var(--bg-tertiary) !important; color: var(--accent-cyan) !important; border-color: var(--silver-light) !important;">الحالة</th>
+          <th style="background-color: var(--bg-tertiary) !important; color: var(--accent-cyan) !important; border-color: var(--silver-light) !important;"> السعر</th>
+          <th style="background-color: var(--bg-tertiary) !important; color: var(--accent-cyan) !important; border-color: var(--silver-light) !important;">التفاصيل</th>
+        </tr>
+      </thead>
+      <tbody style="color: var(--text-primary) !important; background-color: var(--bg-card) !important;">
+        {% for order in all_orders %}
+        <tr style="background-color: var(--bg-card) !important; color: var(--text-primary) !important;">
+          <td style="background-color: var(--bg-card) !important; color: var(--text-primary) !important;">{{ order.id }}</td>
+          <td style="background-color: var(--bg-card) !important; color: var(--text-primary) !important;">
+            {% with order.orderdetails_set.first as detail %}
+              {{ detail.Package.name|default:"N/A" }}
+            {% endwith %}
+          </td>
+          <!--<td>-->
+          <!--  {% with order.orderdetails_set.first as detail %}-->
+          <!--    ${{ detail.price|floatformat:4 }}  <!-- يعرض السعر المحسوب سواء كانت مخصصة أو عادية -->
+          <!--  {% endwith %}-->
+          <!--</td>-->
+          <td style="background-color: var(--bg-card) !important; color: var(--text-primary) !important;">
+            {% with order.orderdetails_set.first as detail %}
+              {{ detail.gamer_id|default:"N/A" }}
+            {% endwith %}
+          </td>
+          <td style="background-color: var(--bg-card) !important; color: var(--text-primary) !important;">{% with order.orderdetails_set.first as detail %}
+              {{ detail.quantity|default:"N/A" }}
+            {% endwith %}
+          </td>   
+          <td style="background-color: var(--bg-card) !important; color: var(--text-primary) !important;">{{ order.order_date|date:"Y-m-d H:i:s" }}</td>
+          <!-- <td>
+            {% if order.is_finished %}
+              <span class="text-success"><i class="fas fa-check-circle"></i> نعم</span>
+            {% else %}
+              <span class="text-danger"><i class="fas fa-times-circle"></i> لا</span>
+            {% endif %}
+          </td> -->
+          <td style="background-color: var(--bg-card) !important; color: var(--text-primary) !important;">
+            {% with order.orderdetails_set.first as detail %}
+              {% if detail.status == "done" %}
+                <span class="badge px-3 py-2 fw-bold" style="background-color: #10B981; color: #FFFFFF; font-size: 14px; border-radius: 6px;"><i class="fas fa-check-circle me-1"></i> مكتمل</span>
+              {% elif detail.status == "rejected" %}
+                <span class="badge px-3 py-2 fw-bold" style="background-color: #EF4444; color: #FFFFFF; font-size: 14px; border-radius: 6px;"><i class="fas fa-times-circle me-1"></i> مرفوض</span>
+              {% elif detail.status == "pending" %}
+                <span class="badge px-3 py-2 fw-bold" style="background-color: #F59E0B; color: #FFFFFF; font-size: 14px; border-radius: 6px;"><i class="fas fa-hourglass-half me-1"></i> قيد المعالجة</span>
+              {% else %}
+                <span class="badge px-3 py-2 fw-bold" style="background-color: #9CA3AF; color: #FFFFFF; font-size: 14px; border-radius: 6px;"><i class="fas fa-question-circle me-1"></i> {{ detail.status|default:"غير محدد" }}</span>
+              {% endif %}
+            {% endwith %}
+          </td>
+<td style="background-color: var(--bg-card) !important; color: var(--accent-gold) !important;">
+  {% for detail in order.orderdetails_set.all %}
+      {% if detail.final_price %}
+          ${{ detail.final_price|floatformat:4 }}
+      {% else %}
+          ${{ detail.price|floatformat:4 }}
+      {% endif %}
+  {% endfor %}
+</td>
+
+
+          <td style="background-color: var(--bg-card) !important; color: var(--text-primary) !important;">
+            {% with order.orderdetails_set.first as detail %}
+              {{ detail.response|default:"-" }}
+            {% endwith %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- التنقل بين الصفحات -->
+  <div class="pagination d-flex justify-content-center mt-4">
+    <span class="step-links">
+      {% if page_obj.has_previous %}
+        <a href="?page=1&filter={{ request.GET.filter }}" class="btn btn-outline-primary btn-sm me-1" title="الأول">&laquo;</a>
+        <a href="?page={{ page_obj.previous_page_number }}&filter={{ request.GET.filter }}" class="btn btn-outline-primary btn-sm me-1" title="الصفحة السابقة">&lsaquo;</a>
+      {% endif %}
+
+      <span class="btn btn-sm disabled" style="background-color: var(--bg-secondary); color: var(--text-primary); border-color: var(--silver-light);">الصفحة {{ page_obj.number }} من {{ page_obj.paginator.num_pages }}</span>
+
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&filter={{ request.GET.filter }}" class="btn btn-outline-primary btn-sm ms-1" title="الصفحة التالية">&rsaquo;</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}&filter={{ request.GET.filter }}" class="btn btn-outline-primary btn-sm ms-1" title="الأخير">&raquo;</a>
+      {% endif %}
+    </span>
+  </div>
+
+  {% else %}
+  <div class="alert alert-info text-center" >
+    لا توجد طلبات حاليًا. <a href="{% url 'packages' %}" class="fw-bold" style="color: var(--accent-cyan);" >عرض جميع الباقات</a>
+  </div>
+  {% endif %}
+
+  <hr>
+</div>
+{% endblock %}
+
+<!-- Font Awesome (for icons) -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />

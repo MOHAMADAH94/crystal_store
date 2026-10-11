@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}المنتجات{% endblock %}
+
+{% block contents %}
+
+<!-- Modern Products Page Header -->
+<section class="modern-page-header">
+  <div class="container">
+    <div class="page-header-content">
+      <h1 class="page-title-modern">
+        <i class="fas fa-shopping-bag me-3"></i>
+        <span>جميع المنتجات</span>
+      </h1>
+      <p class="page-subtitle">اكتشف مجموعتنا الكاملة من المنتجات الرقمية</p>
+    </div>
+  </div>
+</section>
+
+<!-- Search and Filter Section -->
+<section class="modern-filter-section py-4">
+  <div class="container">
+    <div class="filter-wrapper">
+      <!-- Search Box -->
+      <div class="modern-search-box">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="search" class="modern-search-input" placeholder="ابحث عن منتج..." onkeyup="filterProducts()" />
+      </div>
+
+      <!-- Category Filter -->
+      <div class="category-filter-modern">
+        <div class="filter-label">
+          <i class="fas fa-filter me-2"></i>
+          <span>الفئات:</span>
+        </div>
+        <div class="category-buttons-modern">
+          <a href="{% url 'products' %}" class="category-btn-modern {% if not request.GET.category %}active{% endif %}">
+            <i class="fas fa-th-large me-2"></i>
+            <span>الكل</span>
+          </a>
+          {% for category in categories %}
+            <a href="?category={{ category.id }}" class="category-btn-modern {% if request.GET.category == category.id|stringformat:'s' or selected_parent_category and selected_parent_category.id == category.id %}active{% endif %}">
+              <i class="fas fa-folder me-2"></i>
+              <span>{{ category.name }}</span>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Subcategories Grid (if parent category selected) -->
+{% if subcategories %}
+<section class="modern-products-page py-5">
+  <div class="container">
+    <div class="mb-4">
+      <h3 class="text-center mb-4" style="color: var(--accent-cyan);">
+        <i class="fas fa-folder-open me-2"></i>
+        الفئات الفرعية: {{ selected_parent_category.name }}
+      </h3>
+    </div>
+    <div class="products-grid-modern">
+      {% for subcategory in subcategories %}
+      <div class="product-card-modern-page" data-name="{{ subcategory.name }}">
+        <a href="?category={{ subcategory.id }}" class="product-link-page">
+          <div class="product-image-wrapper-page">
+            {% if subcategory.image %}
+              <img src="{{ subcategory.image.url }}" alt="{{ subcategory.name }}" class="product-img-page">
+            {% else %}
+              <div class="product-img-page" style="background: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 50%, #A78BFA 100%); display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-folder fa-3x" style="color: white; opacity: 0.7;"></i>
+              </div>
+            {% endif %}
+            <div class="product-overlay-page">
+              <div class="overlay-content">
+                <i class="fas fa-eye"></i>
+                <span>عرض المنتجات</span>
+              </div>
+            </div>
+          </div>
+          <div class="product-info-page">
+            <h3 class="product-title-page">{{ subcategory.name }}</h3>
+            <div class="product-footer-page">
+              <span class="view-packages">
+                <i class="fas fa-box me-2"></i>
+                عرض المنتجات
+              </span>
+              <i class="fas fa-arrow-left"></i>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Products Grid -->
+{% if not subcategories %}
+<section class="modern-products-page py-5">
+  <div class="container">
+    <div class="products-grid-modern">
+      {% if products %}
+        {% for product in products %}
+        <div class="product-card-modern-page {% if not product.is_active %}disabled{% endif %}" data-name="{{ product.name }}">
+          <a href="{% url 'products_and_packages' product.id %}" class="product-link-page">
+            <div class="product-image-wrapper-page">
+              <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-img-page">
+              {% if not product.is_active %}
+                <div class="unavailable-badge-page">
+                  <i class="fas fa-ban me-2"></i>
+                  <span>غير متوفر</span>
+                </div>
+              {% endif %}
+              <div class="product-overlay-page">
+                <div class="overlay-content">
+                  <i class="fas fa-eye"></i>
+                  <span>عرض التفاصيل</span>
+                </div>
+              </div>
+            </div>
+            <div class="product-info-page">
+              <h3 class="product-title-page">{{ product.name }}</h3>
+              <div class="product-footer-page">
+                <span class="view-packages">
+                  <i class="fas fa-box me-2"></i>
+                  عرض الباقات
+                </span>
+                <i class="fas fa-arrow-left"></i>
+              </div>
+            </div>
+          </a>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-products-state">
+          <div class="empty-icon">
+            <i class="fas fa-shopping-bag"></i>
+          </div>
+          <h3>لا توجد منتجات متاحة</h3>
+          <p>جرب البحث بكلمات مختلفة أو تصفح فئة أخرى</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<script>
+function filterProducts() {
+    const input = document.getElementById('search');
+    const filter = input.value.toUpperCase();
+    const products = document.querySelectorAll('.product-card-modern-page');
+    
+    products.forEach(product => {
+        const productName = product.getAttribute('data-name');
+        if (productName && productName.toUpperCase().includes(filter)) {
+            product.style.display = "block";
+        } else {
+            product.style.display = "none";
+        }
+    });
+}
+</script>
+
+{% endblock %}

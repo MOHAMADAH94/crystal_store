@@ -1,0 +1,364 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load discount_tags %}
+
+{% block title %}الباقات{% endblock %}
+
+{% block contents %}
+<div class="my-form container p-4 my-5 rounded border border-primary shadow">
+
+    <h2 id="package_title" class="text-center mb-4" style="color: var(--accent-cyan);">
+        💼 جميع الباقات
+    </h2>
+    <hr>
+
+    <!-- Modal for Quick Purchase -->
+    <div class="modal fade" id="quickPurchaseModal" tabindex="-1" aria-labelledby="quickPurchaseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--silver-light);">
+                    <div class="modal-header" style="background-color: var(--bg-tertiary); border-bottom: 1px solid var(--silver-light);">
+                        <h5 class="modal-title" id="quickPurchaseModalLabel" style="color: var(--accent-cyan);">شراء سريع</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1); opacity: 0.8;"></button>
+                    </div>
+                <form id="quickPurchaseForm" method="POST" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="package_id" id="hiddenPackageId">
+                    <input type="hidden" name="quantity" id="hiddenQuantity">
+                    <input type="hidden" name="gamer_id" id="hiddenGamerId">
+                    <input type="hidden" name="is_custom" id="hiddenIsCustom">
+                    <input type="hidden" name="direct_payment" value="true">
+                    
+                    <div class="modal-body" style="background-color: var(--bg-card); color: var(--text-primary);">
+                        <div class="row">
+<!-- Right Side - Package Details -->
+<div class="col-md-6">
+    <h4 class="fw-bold mb-3" style="color: var(--accent-cyan);">تفاصيل الباقة</h4>
+    
+    <div class="package-details">
+        <div class="p-3 rounded border mb-3" style="background-color: var(--bg-secondary); border-color: var(--silver-light) !important;">
+            <!-- اسم الباقة والسعر -->
+            <div><strong style="color: var(--accent-cyan);">الباقة:</strong> <span id="modalPackageName" style="color: var(--text-primary);"></span></div>
+            <div><strong style="color: var(--accent-cyan);">السعر:</strong> <span style="color: var(--accent-gold);"><span id="modalPackageCurrency">{{ request.user|currency_symbol }}</span><span id="modalPackagePrice"></span></span></div>
+
+            <!-- الكمية -->
+            <div id="quantityContainer" class="mt-2">
+                <strong style="color: var(--accent-cyan);">الكمية:</strong> 
+                <span id="modalPackageFeatures" style="color: var(--text-primary);"></span>
+            </div>
+
+            <!-- إدخال الكمية المطلوبة -->
+            <div id="customQuantityInput" class="mt-2 d-none">
+                <label for="quantityInput" class="form-label fw-bold" style="color: var(--text-primary);">أدخل الكمية المطلوبة:</label>
+                <input type="number" class="form-control" id="quantityInput" min="0.0001" step="0.0001" value="1">
+                <small id="quantityHelpText" class="form-text text-muted d-none">يمكنك إدخال كمية عشرية (مثال: 1.5 أو 2.75)</small>
+            </div>
+
+            <!-- ✅ إدخال آيدي المستخدم (نُقل مباشرة تحت الكمية) -->
+            <div class="form-group mt-3 mb-3">
+                <label for="gamerId" id="gamerIdLabel" class="form-label fw-bold" style="color: var(--text-primary);">أدخل المعرف الخاص بك:</label>
+                <input type="text" class="form-control" id="gamerId" placeholder="مثال: my_id" required>
+            </div>
+
+            <!-- الوصف والمستوى -->
+            <div><strong style="color: var(--accent-cyan);">الوصف:</strong> <span id="modalPackageDescription" style="color: var(--text-secondary);"></span></div>
+            <div class="mt-2">
+                <strong style="color: var(--accent-cyan);">مستواك:</strong>
+                <span class="badge" id="userLevelBadge" style="background-color: var(--accent-cyan); color: var(--bg-primary);">{{ request.user.userprofile.get_level_display }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Left Side - Payment Details -->
+<div class="col-md-6 border-end" style="border-color: var(--silver-light) !important;">
+    <h4 class="fw-bold mb-3" style="color: var(--accent-cyan);">تفاصيل الدفع</h4>
+    
+    <div class="p-4 rounded border mb-4" style="background-color: var(--bg-secondary); border-color: var(--silver-light) !important;">
+        <p class="mb-1"><strong style="color: var(--accent-cyan);">المجموع:</strong> <span style="color: var(--accent-gold);"><span id="paymentCurrency">{{ request.user|currency_symbol }}</span><span id="paymentTotal">0</span></span></p>
+        <hr class="my-2" style="border-color: var(--silver-light);">
+        <p class="mb-1"><strong style="color: var(--accent-cyan);">المجموع النهائي:</strong> <span style="color: var(--accent-gold);"><span id="paymentFinalCurrency">{{ request.user|currency_symbol }}</span><span id="paymentFinalTotal">0</span></span></p>
+        <p class="mb-0"><strong style="color: var(--accent-cyan);">الرصيد المتاح:</strong> <span style="color: var(--accent-gold);"><span id="balanceCurrency">{{ request.user|currency_symbol }}</span><span id="paymentBalance">{{ request.user.userprofile.balance|convert_price:request.user|floatformat:2 }}</span></span></p>
+    </div>
+
+    <div class="payment-status mb-4">
+        <div id="sufficientBalance" class="alert alert-success text-center fw-bold d-none">
+            ✅ رصيدك يمكنك من إتمام هذه العملية
+        </div>
+        <div id="insufficientBalance" class="alert alert-danger text-center fw-bold d-none">
+            ❌ ليس لديك رصيد كاف لإتمام العملية
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="background-color: var(--bg-tertiary); border-top: 1px solid var(--silver-light);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                        <button type="submit" class="btn btn-primary" id="confirmQuickPurchase">
+                            <i class="fas fa-check-circle me-2"></i> تأكيد الدفع
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <section>
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                {% for package in packages %}
+                <div class="col-6 col-sm-6 col-md-4 col-lg-3 mb-4">
+                    <div class="card h-100 shadow-sm" style="border-radius: 10px; overflow: hidden; border: 1px solid var(--silver-light); background-color: var(--bg-card); {% if not package.is_active %}opacity: 0.5; pointer-events: none;{% endif %}">
+                        <div class="card-body d-flex flex-column p-3">
+                            <h5 class="card-title text-center text-truncate" style="color: var(--accent-cyan); font-size: 16px;">
+                                {{ package.name }}
+                            </h5>
+                            
+                            <p class="card-text text-center mb-3" style="font-size: 14px; color: var(--text-secondary);">
+                                {% if package.is_custom %}
+                                    <span>سعر الوحدة:</span> 
+                                    <span class="fw-bold" style="color: var(--accent-gold);">
+                                        {{ package|increased_price:request.user|format_price:request.user }}
+                                    </span>
+                                {% else %}
+                                    <span>السعر:</span> 
+                                    <span class="fw-bold" style="color: var(--accent-gold);">
+                                        {{ package|increased_price:request.user|format_price:request.user }}
+                                    </span>
+                                {% endif %}
+                            </p>
+
+                            <div class="d-flex flex-column gap-2 mt-auto">
+                                {% if package.is_active %}
+                                    <!-- <a href="{% url 'package' package.id %}" class="btn btn-outline-primary">تفاصيل وشراء</a> -->
+                                    <button class="btn btn-outline-success quick-purchase-btn" 
+                                            data-package-id="{{ package.id }}"
+                                            data-package-name="{{ package.name }}"
+                                            data-package-price="{{ package|increased_price:request.user }}"
+                                            data-package-description="{{ package.description|default:'لا يوجد وصف متاح' }}"
+                                            data-package-features="{{ package.quantity|default:'1' }}"
+                                            data-is-custom="{{ package.is_custom|yesno:'true,false' }}"
+                                            data-allow-decimal-qty="{{ package.product.allow_decimal_qty|yesno:'true,false' }}"
+                                            data-denomination-id="{{ package.denomination_id|default:'' }}"
+                                            data-input-label="{{ package.product.category.input_label|default:'أدخل المعرف الخاص بك' }}"
+                                            data-input-placeholder="{{ package.product.category.input_placeholder|default:'مثال: my_id' }}"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#quickPurchaseModal">
+                                         شراء
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-secondary" disabled>غير متوفر حالياً</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}    
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const quickPurchaseForm = document.getElementById('quickPurchaseForm');
+    const hiddenPackageId = document.getElementById('hiddenPackageId');
+    const hiddenQuantity = document.getElementById('hiddenQuantity');
+    const hiddenGamerId = document.getElementById('hiddenGamerId');
+    const hiddenIsCustom = document.getElementById('hiddenIsCustom');
+    const gamerIdInput = document.getElementById('gamerId');
+    const gamerIdLabel = document.getElementById('gamerIdLabel');
+    const quickPurchaseButtons = document.querySelectorAll('.quick-purchase-btn');
+    const modalPackageName = document.getElementById('modalPackageName');
+    const modalPackagePrice = document.getElementById('modalPackagePrice');
+    const modalPackageDescription = document.getElementById('modalPackageDescription');
+    const modalPackageFeatures = document.getElementById('modalPackageFeatures');
+    const quantityContainer = document.getElementById('quantityContainer');
+    const customQuantityInput = document.getElementById('customQuantityInput');
+    const quantityInput = document.getElementById('quantityInput');
+    const confirmQuickPurchaseBtn = document.getElementById('confirmQuickPurchase');
+    
+    // Payment elements
+    const paymentTotal = document.getElementById('paymentTotal');
+    const paymentFinalTotal = document.getElementById('paymentFinalTotal');
+    const paymentBalance = document.getElementById('paymentBalance');
+    const sufficientBalance = document.getElementById('sufficientBalance');
+    const insufficientBalance = document.getElementById('insufficientBalance');
+    
+    // Get user currency
+    const userCurrency = '{{ request.user.userprofile.currency|default:"USD" }}';
+    const currencySymbol = userCurrency === 'SYP' ? 'SYP' : '$';
+    {% if request.user.userprofile.currency == "SYP" %}
+    const exchangeRate = parseFloat('{{ exchange_rate|default:15000 }}');
+    {% else %}
+    const exchangeRate = 1;
+    {% endif %}
+    
+    let currentPackageId = null;
+    let currentIsCustom = false;
+    let currentUnitPrice = 0;
+    let currentDenominationId = null;
+    let currentAllowDecimalQty = false;
+    
+    // Initialize modal with package data
+    quickPurchaseButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            currentPackageId = this.getAttribute('data-package-id');
+            const packageName = this.getAttribute('data-package-name');
+            currentUnitPrice = parseFloat(this.getAttribute('data-package-price'));
+            const packageDescription = this.getAttribute('data-package-description');
+            const packageQuantity = this.getAttribute('data-package-features');
+            currentIsCustom = this.getAttribute('data-is-custom') === 'true';
+            currentAllowDecimalQty = this.getAttribute('data-allow-decimal-qty') === 'true';
+            currentDenominationId = this.getAttribute('data-denomination-id');
+            
+            // Update hidden fields
+            hiddenPackageId.value = currentPackageId;
+            hiddenIsCustom.value = currentIsCustom;
+            
+            // Update package details
+            modalPackageName.textContent = packageName;
+            modalPackageDescription.textContent = packageDescription;
+            
+            // Handle custom packages
+            if (currentIsCustom) {
+                quantityContainer.classList.add('d-none');
+                customQuantityInput.classList.remove('d-none');
+                
+                // تحديث حقل الكمية حسب allow_decimal_qty
+                if (currentAllowDecimalQty) {
+                    quantityInput.setAttribute('min', '0.0001');
+                    quantityInput.setAttribute('step', '0.0001');
+                    document.getElementById('quantityHelpText').classList.remove('d-none');
+                } else {
+                    quantityInput.setAttribute('min', '1');
+                    quantityInput.setAttribute('step', '1');
+                    document.getElementById('quantityHelpText').classList.add('d-none');
+                }
+                
+                const displayPrice = userCurrency === 'SYP' ? (currentUnitPrice * exchangeRate).toFixed(2) : currentUnitPrice.toFixed(4);
+                modalPackagePrice.textContent = displayPrice;
+                quantityInput.value = packageQuantity || 1;
+                calculateCustomPrice();
+            } else {
+                quantityContainer.classList.remove('d-none');
+                customQuantityInput.classList.add('d-none');
+                modalPackageFeatures.textContent = packageQuantity;
+                const displayPrice = userCurrency === 'SYP' ? (currentUnitPrice * exchangeRate).toFixed(2) : currentUnitPrice.toFixed(4);
+                modalPackagePrice.textContent = displayPrice;
+                hiddenQuantity.value = packageQuantity;
+                updatePaymentDetails(currentUnitPrice);
+            }
+            
+            // ضبط النصوص الخاصة بالمعرف
+            const inputLabel = this.getAttribute('data-input-label');
+            const inputPlaceholder = this.getAttribute('data-input-placeholder');
+            gamerIdLabel.textContent = inputLabel;
+            gamerIdInput.placeholder = inputPlaceholder;
+
+            // Reset form and validation
+            gamerIdInput.value = '';
+            quickPurchaseForm.action = `/orders/add_to_cart/${currentPackageId}/`;
+        });
+    });
+    
+    // Handle quantity changes for custom packages
+    quantityInput.addEventListener('input', function() {
+        if (currentIsCustom) {
+            calculateCustomPrice();
+        }
+    });
+    
+    function calculateCustomPrice() {
+        const quantity = parseFloat(quantityInput.value) || 1;
+        if (quantity <= 0) {
+            quantityInput.value = 1;
+            return;
+        }
+        const totalPrice = quantity * currentUnitPrice;
+        // عرض الكمية بشكل صحيح (عشري أو صحيح)
+        if (currentAllowDecimalQty) {
+            modalPackageFeatures.textContent = quantity.toFixed(4);
+        } else {
+            modalPackageFeatures.textContent = Math.round(quantity);
+        }
+        hiddenQuantity.value = quantity;
+        updatePaymentDetails(totalPrice);
+    }
+    
+    function updatePaymentDetails(totalPrice) {
+        // Get balance in USD (stored in database)
+        const balanceUsd = parseFloat('{{ request.user.userprofile.balance|default:0 }}');
+        
+        // Convert to user currency if needed
+        let displayTotal = totalPrice;
+        let displayBalance = balanceUsd;
+        
+        if (userCurrency === 'SYP') {
+            displayTotal = totalPrice * exchangeRate;
+            displayBalance = balanceUsd * exchangeRate;
+        }
+        
+        // Format numbers based on currency
+        const totalDecimals = userCurrency === 'SYP' ? 2 : 4;
+        const balanceDecimals = userCurrency === 'SYP' ? 2 : 4;
+        
+        paymentTotal.textContent = displayTotal.toFixed(totalDecimals);
+        paymentFinalTotal.textContent = displayTotal.toFixed(totalDecimals);
+        paymentBalance.textContent = displayBalance.toFixed(balanceDecimals);
+        
+        // Compare in USD (database currency)
+        if (balanceUsd >= totalPrice) {
+            sufficientBalance.classList.remove('d-none');
+            insufficientBalance.classList.add('d-none');
+            confirmQuickPurchaseBtn.disabled = false;
+        } else {
+            sufficientBalance.classList.add('d-none');
+            insufficientBalance.classList.remove('d-none');
+            confirmQuickPurchaseBtn.disabled = true;
+        }
+    }
+    
+    // Form submission handler
+    quickPurchaseForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        if (!gamerIdInput.value.trim()) {
+            alert('الرجاء إدخال المعرف المطلوب');
+            gamerIdInput.focus();
+            return;
+        }
+
+        const finalTotal = parseFloat(paymentFinalTotal.textContent);
+        const balance = parseFloat(paymentBalance.textContent);
+        
+        if (balance < finalTotal) {
+            alert('ليس لديك رصيد كافٍ لإتمام هذه العملية');
+            return;
+        }
+
+        hiddenGamerId.value = gamerIdInput.value.trim();
+        
+        // التأكد من أن direct_payment موجود وقيمته true
+        const directPaymentInput = document.querySelector('input[name="direct_payment"]');
+        if (directPaymentInput) {
+            directPaymentInput.value = 'true';
+        } else {
+            // إضافة الحقل إذا لم يكن موجوداً
+            const hiddenDirectPayment = document.createElement('input');
+            hiddenDirectPayment.type = 'hidden';
+            hiddenDirectPayment.name = 'direct_payment';
+            hiddenDirectPayment.value = 'true';
+            quickPurchaseForm.appendChild(hiddenDirectPayment);
+        }
+        
+        quickPurchaseForm.action = `/orders/add_to_cart/${currentPackageId}/`;
+
+        confirmQuickPurchaseBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> جارٍ المعالجة...';
+        confirmQuickPurchaseBtn.disabled = true;
+
+        this.submit();
+    });
+});
+</script>
+{% endblock %}

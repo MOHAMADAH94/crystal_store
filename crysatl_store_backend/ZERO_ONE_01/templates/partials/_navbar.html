@@ -1,0 +1,158 @@
+{% load static %}
+
+<nav class="modern-navbar navbar navbar-expand-lg fixed-top">
+  <div class="container-fluid px-4">
+    <!-- Logo -->
+    <a class="modern-navbar-brand" href="{% url 'index' %}">
+      <img src="{% static 'img/mylogo.png' %}" alt="Crystal" class="navbar-logo">
+      <span class="navbar-brand-text">Crystal</span>
+    </a>
+
+    <!-- Toggler -->
+    <button class="modern-navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <!-- Navbar Content -->
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="modern-navbar-nav">
+        <li class="nav-item">
+          <a class="modern-nav-link {% if '/' == request.path %}active{% endif %}" href="{% url 'index' %}">
+            <i class="fas fa-home"></i>
+            <span>الرئيسية</span>
+          </a>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a class="modern-nav-link dropdown-toggle {% if 'packages' in request.path or 'products' in request.path %}active{% endif %}" 
+             href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-shopping-bag"></i>
+            <span>المنتجات</span>
+          </a>
+          <ul class="modern-dropdown-menu" aria-labelledby="productsDropdown">
+            <li><a class="modern-dropdown-item" href="{% url 'products' %}">
+              <i class="fas fa-th-large me-2"></i>جميع المنتجات
+            </a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><h6 class="dropdown-header">التصنيفات</h6></li>
+            <li><a class="modern-dropdown-item" href="{% url 'products' %}?category=3">
+              <i class="fas fa-gamepad me-2"></i>ألعاب
+            </a></li>
+            <li><a class="modern-dropdown-item" href="{% url 'products' %}?category=2">
+              <i class="fas fa-mobile-alt me-2"></i>تطبيقات
+            </a></li>
+            <li><a class="modern-dropdown-item" href="{% url 'products' %}?category=4">
+              <i class="fas fa-dollar-sign me-2"></i>رصيد
+            </a></li>
+            <li><a class="modern-dropdown-item" href="{% url 'products' %}?category=5">
+              <i class="fas fa-credit-card me-2"></i>بطاقات
+            </a></li>
+            <li><a class="modern-dropdown-item" href="{% url 'products' %}?category=6">
+              <i class="fab fa-bitcoin me-2"></i>عملات رقمية
+            </a></li>
+          </ul>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a class="modern-nav-link dropdown-toggle {% if 'signin' in request.path or 'signup' in request.path or 'profile' in request.path %}active{% endif %}" 
+             href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            {% if request.user.is_authenticated %}
+              <i class="fas fa-user-circle"></i>
+              <span>الأقسام</span>
+            {% else %}
+              <i class="fas fa-sign-in-alt"></i>
+              <span>تسجيل الدخول</span>
+            {% endif %}
+          </a>
+          <ul class="modern-dropdown-menu" aria-labelledby="userDropdown">
+            {% if request.user.is_authenticated %}
+              <li><a class="modern-dropdown-item" href="{% url 'profile' %}">
+                <i class="fas fa-user me-2"></i>ملفي الشخصي
+              </a></li>
+              <li><a class="modern-dropdown-item" href="{% url 'show_orders' %}">
+                <i class="fas fa-clipboard-list me-2"></i>طلباتي
+              </a></li>
+              <li><a class="modern-dropdown-item" href="{% url 'balance_history' %}">
+                <i class="fas fa-wallet me-2"></i>رصيدي
+              </a></li>
+              <li><a class="modern-dropdown-item" href="{% url 'send_money' %}">
+                <i class="fas fa-paper-plane me-2"></i>إرسال دفعة
+              </a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="modern-dropdown-item text-danger" href="{% url 'signout' %}">
+                <i class="fas fa-sign-out-alt me-2"></i>تسجيل الخروج
+              </a></li>
+            {% else %}
+              <li><a class="modern-dropdown-item" href="{% url 'signin' %}">
+                <i class="fas fa-sign-in-alt me-2"></i>تسجيل الدخول
+              </a></li>
+              <li><a class="modern-dropdown-item" href="{% url 'signup' %}">
+                <i class="fas fa-user-plus me-2"></i>إنشاء حساب
+              </a></li>
+            {% endif %}
+          </ul>
+        </li>
+
+        <li class="nav-item">
+          <a class="modern-nav-link {% if '/terms' == request.path %}active{% endif %}" href="{% url 'terms' %}">
+            <i class="fas fa-file-contract"></i>
+            <span>الشروط</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="modern-nav-link {% if '/about' == request.path %}active{% endif %}" href="{% url 'about' %}">
+            <i class="fas fa-info-circle"></i>
+            <span>عن الموقع</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Right Side Items -->
+      <div class="modern-navbar-actions">
+        <!-- Language Switch -->
+        <div class="dropdown">
+          <a class="modern-action-btn dropdown-toggle" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-globe"></i>
+            <span class="d-none d-md-inline">اللغة</span>
+          </a>
+          <ul class="modern-dropdown-menu dropdown-menu-end" aria-labelledby="langDropdown">
+            <li><a class="modern-dropdown-item" href="#" onclick="changeLanguage('en')">
+              <i class="flag-icon flag-icon-us me-2"></i>English
+            </a></li>
+            <li><a class="modern-dropdown-item" href="#" onclick="changeLanguage('ar')">
+              <i class="flag-icon flag-icon-sa me-2"></i>العربية
+            </a></li>
+            <li><a class="modern-dropdown-item" href="#" onclick="changeLanguage('tr')">
+              <i class="flag-icon flag-icon-tr me-2"></i>Türkçe
+            </a></li>
+          </ul>
+        </div>
+
+        <!-- Notifications -->
+        <a class="modern-action-btn position-relative" href="{% url 'notifications' %}">
+          <i class="fas fa-bell"></i>
+          {% if unread_notifications_count > 0 %}
+            <span class="modern-badge">{{ unread_notifications_count }}</span>
+          {% endif %}
+        </a>
+
+        <!-- User Balance -->
+        {% if request.user.is_authenticated %}
+          <div class="modern-user-info">
+            <div class="balance-display">
+              <span class="balance-label">الرصيد:</span>
+              <span class="balance-value">${{ request.user.userprofile.balance }}</span>
+            </div>
+            <div class="level-display">
+              <span class="level-badge">{{ request.user.userprofile.level }}</span>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>

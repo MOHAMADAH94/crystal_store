@@ -1,0 +1,113 @@
+{% load static %}
+
+<footer class="modern-footer">
+  <div class="footer-pattern"></div>
+  <div class="container position-relative">
+    <div class="row g-4">
+      
+      <!-- Logo & About -->
+      <div class="col-lg-4 col-md-6">
+        <div class="footer-brand">
+          <img src="{% static 'img/mylogo.png' %}" alt="Crystal Logo" class="footer-logo">
+          <h3 class="footer-brand-name">Crystal STORE</h3>
+        </div>
+        <p class="footer-description">
+          نقدم حلول الدفع الرقمي والاشتراكات بأفضل الأسعار وأعلى معايير الجودة والأمان
+        </p>
+        <div class="footer-social-links">
+          <a href="https://wa.me/+963987654321" class="social-link-modern">
+            <i class="fab fa-whatsapp"></i>
+          </a>
+          <a href="mailto:support@Crystal.com" class="social-link-modern">
+            <i class="fas fa-envelope"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="col-lg-2 col-md-6">
+        <h4 class="footer-title">روابط سريعة</h4>
+        <ul class="footer-links">
+          <li>
+            <a href="{% url 'index' %}">
+              <i class="fas fa-home"></i>
+              <span>الرئيسية</span>
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'products' %}">
+              <i class="fas fa-shopping-bag"></i>
+              <span>المنتجات</span>
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'terms' %}">
+              <i class="fas fa-file-alt"></i>
+              <span>الشروط والأحكام</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="col-lg-3 col-md-6">
+        <h4 class="footer-title">خدمة العملاء</h4>
+        <div class="footer-contact">
+          <div class="contact-item-modern">
+            <div class="contact-icon-modern whatsapp">
+              <i class="fab fa-whatsapp"></i>
+            </div>
+            <div class="contact-info-modern">
+              <span class="contact-label">واتساب الدعم</span>
+              <span class="contact-value">963987654321+</span>
+            </div>
+          </div>
+          <div class="contact-item-modern">
+            <div class="contact-icon-modern email">
+              <i class="fas fa-envelope"></i>
+            </div>
+            <div class="contact-info-modern">
+              <span class="contact-label">البريد الإلكتروني</span>
+              <span class="contact-value">support@Crystal.com</span>
+            </div>
+          </div>
+          <div class="contact-item-modern">
+            <div class="contact-icon-modern clock">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="contact-info-modern">
+              <span class="contact-label">ساعات العمل</span>
+              <span class="contact-value">24/7</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Support Button -->
+      <div class="col-lg-3 col-md-6">
+        <div class="footer-cta">
+          <h4 class="footer-title">تحتاج مساعدة؟</h4>
+          <p class="footer-cta-text">فريقنا جاهز لمساعدتك في أي وقت</p>
+          <a href="https://wa.me/+963987654321" class="btn-footer-cta">
+            <i class="fas fa-headset me-2"></i>
+            <span>تواصل معنا</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Copyright -->
+    <div class="footer-bottom">
+      <div class="footer-logo-bottom">
+        <a href="https://wa.me/+963967770101" target="_blank">
+          <img src="{% static 'img/secondlogo.png' %}" alt="Second Logo" class="bottom-logo">
+        </a>
+      </div>
+      <p class="footer-copyright">
+        &copy; <span class="year">2019</span> Crystal. جميع الحقوق محفوظة.
+        <span class="d-block d-md-inline mt-2 mt-md-0">تصميم وتطوير <strong>ZERO ONE 01</strong></span>
+      </p>
+    </div>
+  </div>
+</footer>

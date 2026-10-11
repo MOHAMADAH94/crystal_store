@@ -1,0 +1,46 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <!-- أيقونة لوحة التحكم لجميع المتصفحات -->
+    <link rel="icon" href="{% static 'img/mylogo.png' %}" type="image/png">
+    <link rel="shortcut icon" href="{% static 'img/mylogo.png' %}" type="image/png">
+    <style>
+        body {
+            direction: rtl;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        #branding h1, #branding h1 a:link, #branding h1 a:visited {
+            color: #fff;
+        }
+        .module h2, .module caption, .inline-group h2 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        div.breadcrumbs {
+            background: #5a67d8;
+            color: #fff;
+        }
+        .button, input[type=submit], input[type=button], .submit-row input, a.button {
+            background: #667eea;
+            border-color: #667eea;
+        }
+        .button:hover, input[type=submit]:hover, input[type=button]:hover {
+            background: #764ba2;
+            border-color: #764ba2;
+        }
+    </style>
+{% endblock %}
+
+{% block branding %}
+    <h1 id="head">
+        <img src="{% static 'img/mylogo.png' %}" alt="شعار الموقع" style="width: 80px; height:50px;">
+        لوحة تحكم Crystal
+    </h1>
+{% endblock %}
+
+{% block title %}{{ title }} | لوحة تحكم Crystal{% endblock %}

@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إرسال دفعة رصيد{% endblock %}
+{% block contents %}
+<!-- داخل block contents -->
+<div class="my-form container p-5 my-5 rounded" style="background-color: var(--bg-card); border: 1px solid var(--silver-light);">
+  <h2 class="text-center mb-4" style="color: var(--accent-cyan);">إرسال دفعة رصيد</h2>
+  <hr class="mb-4" style="border-color: var(--silver-light);">
+
+  {% if request.user.is_authenticated %}
+
+  <!-- طرق الدفع -->
+  <div class="mb-5">
+    <h4 class="text-center mb-4" style="color: var(--accent-cyan);">طرق الدفع المتاحة</h4>
+    <div class="row justify-content-center">
+      {% for method in payment_methods %}
+      <div class="col-md-6 col-lg-5 mb-4">
+        <div class="border rounded shadow-sm p-3 h-100" style="border-color: var(--silver-light); background-color: var(--bg-card);">
+          <div class="d-flex align-items-center mb-2">
+            <img src="{{ method.image.url }}" alt="{{ method.name }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
+            <div class="ms-3 flex-grow-1">
+              <h6 class="mb-1">{{ method.name }}</h6>
+              <p class="mb-0 small" id="address-{{ method.id }}">{{ method.address }}</p>
+            </div>
+            <button onclick="copyText('{{ method.id }}')" class="btn btn-outline-primary btn-sm" title="نسخ العنوان">
+              <i class="fas fa-copy"></i>
+            </button>
+          </div>
+          <p class="small text-muted mb-1">{{ method.details|linebreaksbr }}</p>
+          <p class="mb-0"><strong>الخصم:</strong> {{ method.discount_percentage }}%</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- نموذج إرسال الدفعة -->
+  <form method="POST" enctype="multipart/form-data" class="p-4 rounded shadow-sm" style="background-color: var(--bg-secondary);">
+    {% csrf_token %}
+    {% include 'partials/_alerts.html' %}
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label">المبلغ</label>
+        <input type="number" name="amount" id="inputAmount" class="form-control border-primary" required oninput="updateSendAmount()">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">المبلغ الذي سيتم إرساله</label>
+        <input type="number" name="send_amount" id="inputSendAmount" class="form-control border-primary" readonly required>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">طريقة الدفع (اختياري)</label>
+      <select name="payment_method" id="inputPaymentMethodDropdown" class="form-select border-primary" onchange="updateSendAmount()">
+        {% for method in payment_methods %}
+        <option value="{{ method.id }}" data-discount="{{ method.discount_percentage }}">{{ method.name }} - خصم {{ method.discount_percentage }}%</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">تحميل إشعار التحويل</label>
+      <input type="file" name="receipt" id="inputTransferReceipt" class="form-control border-primary" required accept="image/*">
+    </div>
+
+    <div class="text-center">
+      <button type="submit" name="btnsend" class="btn btn-primary px-5">
+        <i class="fas fa-paper-plane me-2"></i>إرسال
+      </button>
+    </div>
+  </form>
+
+  <hr class="my-5">
+
+  <!-- جدول الدفعات السابقة -->
+  <h4 class="text-center mb-4" style="color: var(--accent-cyan);">تفاصيل دفعات الرصيد</h4>
+  <div class="table-responsive">
+    <table class="table table-bordered text-center shadow-sm" style="background-color: var(--bg-card) !important;">
+      <thead class="table-primary" style="background-color: var(--bg-tertiary) !important; color: var(--accent-cyan) !important;">
+        <tr style="background-color: var(--bg-tertiary) !important;">
+          <th style="background-color: var(--bg-tertiary) !important; color: var(--accent-cyan) !important; border-color: var(--silver-light) !important;">المبلغ</th>
+          <th style="background-color: var(--bg-tertiary) !important; color: var(--accent-cyan) !important; border-color: var(--silver-light) !important;">الحالة</th>
+          <th style="background-color: var(--bg-tertiary) !important; color: var(--accent-cyan) !important; border-color: var(--silver-light) !important;">التاريخ</th>
+          <th style="background-color: var(--bg-tertiary) !important; color: var(--accent-cyan) !important; border-color: var(--silver-light) !important;">الإشعار</th>
+          <th style="background-color: var(--bg-tertiary) !important; color: var(--accent-cyan) !important; border-color: var(--silver-light) !important;">طريقة الدفع</th>
+        </tr>
+      </thead>
+      <tbody style="background-color: var(--bg-card) !important;">
+        {% for payment in payments %}
+        <tr style="background-color: var(--bg-card) !important; color: var(--text-primary) !important;">
+          <td style="background-color: var(--bg-card) !important; color: var(--accent-gold) !important;">{{ payment.amount }}</td>
+          <td style="background-color: var(--bg-card) !important;">
+            {% if payment.is_processed %}
+              <span style="color: #28a745 !important;">تمت المعالجة</span>
+            {% else %}
+              <span style="color: var(--accent-coral) !important;">لم تتم</span>
+            {% endif %}
+          </td>
+          <td style="background-color: var(--bg-card) !important; color: var(--text-primary) !important;">{{ payment.created_at|date:"Y-m-d H:i:s" }}</td>
+          <td style="background-color: var(--bg-card) !important;"><a href="{{ payment.receipt.url }}" target="_blank" class="btn btn-sm btn-outline-info">عرض</a></td>
+          <td style="background-color: var(--bg-card) !important; color: var(--text-primary) !important;">{{ payment.payment_method.name }}</td>
+        </tr>
+        {% empty %}
+        <tr style="background-color: var(--bg-card) !important;"><td colspan="5" class="text-center" style="color: var(--text-muted) !important;">لا توجد دفعات حالياً.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination mt-4 d-flex justify-content-center">
+    <span class="step-links">
+      {% if payments.has_previous %}
+        <a href="?page=1" class="btn btn-sm btn-outline-secondary me-1">&laquo;</a>
+        <a href="?page={{ payments.previous_page_number }}" class="btn btn-sm btn-outline-secondary me-1">&lsaquo;</a>
+      {% endif %}
+      <span class="btn btn-sm btn-light disabled">الصفحة {{ payments.number }} من {{ payments.paginator.num_pages }}</span>
+      {% if payments.has_next %}
+        <a href="?page={{ payments.next_page_number }}" class="btn btn-sm btn-outline-secondary ms-1">&rsaquo;</a>
+        <a href="?page={{ payments.paginator.num_pages }}" class="btn btn-sm btn-outline-secondary ms-1">&raquo;</a>
+      {% endif %}
+    </span>
+  </div>
+
+  {% else %}
+  <div class="alert alert-warning text-center">يرجى <a href="{% url 'signin' %}">تسجيل الدخول</a> لإرسال دفعة.</div>
+  {% endif %}
+</div>
+
+<!-- Scripts -->
+<script>
+  function updateSendAmount() {
+    const selected = document.getElementById('inputPaymentMethodDropdown').selectedOptions[0];
+    const discount = parseFloat(selected.getAttribute('data-discount')) || 0;
+    const amount = parseFloat(document.getElementById('inputAmount').value) || 0;
+    const final = amount * (1 - discount / 100);
+    document.getElementById('inputSendAmount').value = final.toFixed(2);
+  }
+
+  function copyText(id) {
+    const text = document.getElementById('address-' + id).innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      alert("تم نسخ العنوان!");
+    });
+  }
+
+  document.getElementById('inputTransferReceipt').addEventListener('change', function(e) {
+    const label = e.target.nextElementSibling;
+    if (e.target.files.length > 0) {
+      label.textContent = e.target.files[0].name;
+    }
+  });
+</script>
+
+
+{% endblock %}
+
+<style>
+.payment-method-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #f0ad4e;
+    margin-bottom: 15px;
+    transition: background-color 0.3s ease;
+}
+
+.payment-method-container:hover {
+    background-color: #f9f9f9;
+}
+
+.payment-method-image img {
+    border-radius: 8px;
+}
+
+.payment-method-details {
+    flex-grow: 1;
+    padding-left: 0;
+    width: 100%;
+}
+
+.payment-method-details p {
+    margin: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* تخصيص العرض على الشاشات الصغيرة */
+@media (max-width: 768px) {
+    .payment-method-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .payment-method-image {
+        margin-bottom: 15px;
+        width: 80px;
+        height: 80px;
+    }
+
+    .payment-method-details {
+        padding-left: 0;
+        max-width: 100%;
+    }
+}
+
+</style>

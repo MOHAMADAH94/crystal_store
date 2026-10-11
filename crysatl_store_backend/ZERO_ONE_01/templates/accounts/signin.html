@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}signin{% endblock %}
+{% block contents  %}
+
+<div class="my-form container p-5 my-5 rounded border border-primary">
+    
+    <h2 class="text-center" style="font-weight: 700; color: var(--accent-cyan);">تسجيل الدخول</h2>
+    
+    <hr style="border-color: var(--silver-light);">
+    
+    {% if request.user.is_authenticated %}
+        <h3 class="alert alert-primary"> {{ request.user.username }} أهلا بك في موقعنا </h3>
+        <a href="{% url 'index' %}" class="btn btn-primary">الرئيسية </a>
+        <a href="{% url 'products' %}" class="btn btn-primary">المنتجات </a>
+
+    {% else %}
+        <form method="POST">
+        {% csrf_token %}
+        
+            {% include 'partials/_alerts.html' %}
+
+        <div class="form-group mb-3">
+            <label for="inputUsername" class="fw-semibold" style="color: var(--accent-cyan);">اسم المستخدم</label>
+            <input type="text" class="form-control border-primary" id="inputUsername" name="username" placeholder="" required >
+        </div>
+        <div class="form-group mb-3">
+            <label for="inputPassword" class="fw-semibold" style="color: var(--accent-cyan);">كلمة المرور</label>
+            <input type="password" class="form-control border-primary" id="inputPassword" name="password" required >
+        </div>
+        <div class="text-center mt-3">
+            <span style="color: var(--text-muted);">ليس لديك حساب؟</span>
+            <a href="{% url 'signup' %}" class="fw-bold" style="text-decoration: none; color: var(--accent-cyan);">أنشئ حساب جديد</a>
+        </div>
+        <div class="social-login my-4">
+
+        <!-- زر Google مفعّل -->
+        <a href="{% url 'social:begin' 'google-oauth2' %}?next=/"
+            class="btn btn-outline-danger w-100 mb-3 d-flex align-items-center justify-content-center"
+            style="font-weight: 600;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png" alt="Google Logo"
+                style="width: 20px; height: 20px; margin-left: 10px;">
+            تسجيل الدخول باستخدام Google
+        </a>
+
+        <!-- زر Facebook غير مفعّل -->
+        <button class="btn btn-outline-primary w-100 mb-3 d-flex align-items-center justify-content-center" disabled
+                style="font-weight: 600;">
+            <img src="https://www.facebook.com/images/fb_icon_325x325.png" alt="Facebook Logo"
+                style="width: 20px; height: 20px; margin-left: 10px;">
+            تسجيل الدخول باستخدام Facebook
+        </button>
+
+        <!-- زر Apple غير مفعّل -->
+        <button class="btn btn-outline-dark w-100 d-flex align-items-center justify-content-center" disabled
+                style="font-weight: 600;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple Logo"
+                style="width: 20px; height: 20px; margin-left: 10px;">
+            تسجيل الدخول باستخدام Apple
+        </button>
+
+        </div>
+
+
+
+<div class="form-group mb-4 d-flex align-items-center justify-content-start">
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="remember" id="inputRemember" 
+               style="width: 1.2em; height: 1.2em; border: 2px solid var(--accent-cyan); cursor: pointer; margin: 0 8px 0 0;">
+    </div>
+    <label class="form-check-label mb-0" for="inputRemember" style="color: var(--accent-cyan);" 
+           style="cursor: pointer; user-select: none;">تذكرني</label>
+</div>
+
+
+        <button name="btnsignin" type="submit" class="btn btn-primary w-100" style="font-weight: 600;">تسجيل الدخول</button>
+    </form>
+    {% endif %}
+</div>
+
+{% endblock %}

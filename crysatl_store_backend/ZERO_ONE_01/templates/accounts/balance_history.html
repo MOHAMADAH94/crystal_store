@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}تاريخ الرصيد{% endblock %}
+
+{% block contents %}
+<div class="container my-5 py-5" style="background-color: var(--bg-card); border-radius: 12px; border: 1px solid var(--silver-light);">
+    
+    <h2 class="text-center mb-4 fw-bold" style="color: var(--accent-cyan);">
+        :تاريخ الدفعات والسحب من الرصيد
+    </h2>
+
+    <hr class="mb-4" style="border-top: 2px solid var(--silver-light);">
+
+    
+    {% include 'partials/_alerts.html' %}
+<div class="text-center mb-4">
+    <div class="card shadow-sm p-3 border-start border-4" style="max-width: 400px; margin: auto; background-color: var(--bg-secondary); border-color: var(--accent-cyan) !important;">
+        <div class="d-flex flex-column gap-3">
+
+            <!-- الرصيد الحالي مع الأيقونة -->
+            <div class="d-flex align-items-center justify-content-center gap-3">
+                <i class="fas fa-wallet fa-2x" style="color: var(--accent-cyan);"></i>
+                {% if request.user.is_authenticated %}
+                <div>
+                    <h5 class="mb-0 fw-bold">الرصيد الحالي:</h5>
+                    <h4 class="text-warning fw-bold">
+                        ${{ request.user.userprofile.balance }} <small>دولار</small>
+                    </h4>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- المستوى مع أيقونة ثابتة -->
+            <div class="d-flex align-items-center justify-content-center gap-3">
+                <i class="fas fa-medal fa-2x" style="color: var(--accent-cyan);"></i>
+                {% if request.user.is_authenticated %}
+                <div>
+                    <h5 class="mb-0 fw-bold">المستوى :</h5>
+                    <h4 class="text-warning fw-bold">{{ request.user.userprofile.level }}</h4>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+    <div class="row text-center mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body rounded-4" style="background-color: var(--bg-secondary);">
+                    <h5 class="card-title text-success fw-bold mb-3">
+                        <i class="fas fa-arrow-down fa-lg me-2"></i> إجمالي الدفعات
+                    </h5>
+                    <p class="card-text fs-4 fw-bold text-success">{{ total_deposits }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body rounded-4" style="background-color: var(--bg-secondary);">
+                    <h5 class="card-title text-danger fw-bold mb-3">
+                        <i class="fas fa-arrow-up fa-lg me-2"></i> إجمالي السحوبات
+                    </h5>
+                    <p class="card-text fs-4 fw-bold text-danger">{{ total_withdrawals }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- تعديل مهم: إضافة معلمة التصفية إلى رابط الصفحة -->
+    <form method="get" class="text-center mb-4">
+        <div class="form-group mx-auto" style="max-width: 300px;">
+            <label for="filterSelect" class="fw-semibold mb-2" style="color: var(--accent-cyan);">
+                اختر نوع المعاملة:
+            </label>
+            <select name="filter" id="filterSelect" class="form-select text-center" onchange="this.form.submit();">
+                <option value="all" {% if request.GET.filter == "all" or not request.GET.filter %}selected{% endif %}>الكل</option>
+                <option value="deposits" {% if request.GET.filter == "deposits" %}selected{% endif %}>الدفعات</option>
+                <option value="withdrawals" {% if request.GET.filter == "withdrawals" %}selected{% endif %}>السحوبات</option>
+            </select>
+        </div>
+    </form>
+    
+    <div class="table-responsive">
+        <table class="table table-bordered text-center align-middle shadow-sm" style="background-color: var(--bg-card) !important;">
+            <thead class="table-primary" style="background-color: var(--bg-tertiary) !important; color: var(--accent-cyan) !important;">
+                <tr style="background-color: var(--bg-tertiary) !important;">
+                    <th style="background-color: var(--bg-tertiary) !important; color: var(--accent-cyan) !important; border-color: var(--silver-light) !important;">التاريخ</th>
+                    <th style="background-color: var(--bg-tertiary) !important; color: var(--accent-cyan) !important; border-color: var(--silver-light) !important;">الرصيد القديم</th>
+                    <th style="background-color: var(--bg-tertiary) !important; color: var(--accent-cyan) !important; border-color: var(--silver-light) !important;">الرصيد الجديد</th>
+                    <th style="background-color: var(--bg-tertiary) !important; color: var(--accent-cyan) !important; border-color: var(--silver-light) !important;">الفارق</th>
+                </tr>
+            </thead>
+            <tbody style="background-color: var(--bg-card) !important;">
+                {% for log in balance_logs %}
+                <tr style="background-color: var(--bg-card) !important;">
+                    <td style="background-color: var(--bg-card) !important; color: var(--text-primary) !important;">{{ log.change_date |date:"Y-m-d H:i:s" }}</td>
+                    <td style="background-color: var(--bg-card) !important; color: var(--accent-gold) !important;">{{ log.old_balance }}</td>
+                    <td style="background-color: var(--bg-card) !important; color: var(--accent-gold) !important;">{{ log.new_balance }}</td>
+                    <td style="background-color: var(--bg-card) !important;">
+                        {% if log.difference > 0 %}
+                            <span class="fw-bold" style="color: #28a745 !important;">
+                                <i class="fas fa-arrow-up"></i> {{ log.difference }}
+                            </span>
+                        {% elif log.difference < 0 %}
+                            <span class="fw-bold" style="color: var(--accent-coral) !important;">
+                                <i class="fas fa-arrow-down"></i> {{ log.difference }}
+                            </span>
+                        {% else %}
+                            <span style="color: var(--text-muted) !important;">0</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="alert alert-warning text-center fw-semibold">
+                        لا توجد تغييرات في الرصيد.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+   {% if balance_logs.has_other_pages %}
+<div class="pagination d-flex justify-content-center mt-4">
+    <span class="step-links">
+        {% if balance_logs.has_previous %}
+            <a href="?page=1{% if request.GET.filter %}&filter={{ request.GET.filter }}{% endif %}" 
+               class="btn btn-outline-primary btn-sm me-1" title="الأول">&laquo;</a>
+            <a href="?page={{ balance_logs.previous_page_number }}{% if request.GET.filter %}&filter={{ request.GET.filter }}{% endif %}" 
+               class="btn btn-outline-primary btn-sm me-1" title="الصفحة السابقة">&lsaquo;</a>
+        {% endif %}
+
+        <span class="btn btn-sm disabled" style="background-color: var(--bg-secondary); color: var(--text-primary); border-color: var(--silver-light);">
+            الصفحة {{ balance_logs.number }} من {{ balance_logs.paginator.num_pages }}
+        </span>
+
+        {% if balance_logs.has_next %}
+            <a href="?page={{ balance_logs.next_page_number }}{% if request.GET.filter %}&filter={{ request.GET.filter }}{% endif %}" 
+               class="btn btn-outline-primary btn-sm ms-1" title="الصفحة التالية">&rsaquo;</a>
+            <a href="?page={{ balance_logs.paginator.num_pages }}{% if request.GET.filter %}&filter={{ request.GET.filter }}{% endif %}" 
+               class="btn btn-outline-primary btn-sm ms-1" title="الأخير">&raquo;</a>
+        {% endif %}
+    </span>
+</div>
+{% endif %}
+
+</div>
+
+{% endblock %}

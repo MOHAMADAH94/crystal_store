@@ -1,0 +1,38 @@
+<!-- {% if messages %}
+  {% for msg in messages %}
+    <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
+      <strong>
+        {% if 'danger' == msg.tags %}
+          Error
+        {% else %}
+          {{ msg.tags|title }}
+        {% endif %}
+        :
+      </strong> {{ msg }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endfor %}
+{% endif %} -->
+
+
+{% if messages %}
+  <div class="container mt-3">
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }} alert-dismissible fade show text-end" role="alert">
+        <strong>
+          {% if msg.tags == 'danger' or msg.tags == 'error' %}
+            ❌ خطأ:
+          {% elif msg.tags == 'success' %}
+            ✅ تم:
+          {% elif msg.tags == 'warning' %}
+            ⚠️ تحذير:
+          {% else %}
+            ℹ️ ملاحظة:
+          {% endif %}
+        </strong>
+        {{ msg }}
+        <button type="button" class="btn-close float-start" data-bs-dismiss="alert" aria-label="إغلاق"></button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}

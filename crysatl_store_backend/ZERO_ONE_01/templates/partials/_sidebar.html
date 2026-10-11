@@ -1,0 +1,142 @@
+{% load static %}
+
+<!-- Sidebar -->
+<aside id="sidebar" class="sidebar">
+  <!-- Sidebar Header -->
+  <div class="sidebar-header">
+    <div class="sidebar-header-top">
+      <a class="sidebar-brand d-flex align-items-center" href="{% url 'index' %}">
+        <img src="{% static 'img/mylogo.png' %}" alt="Crystal" class="sidebar-logo">
+        <span class="sidebar-brand-text">Crystal STORE</span>
+      </a>
+      <button class="sidebar-toggle-btn d-lg-none" id="sidebarToggle" aria-label="Toggle sidebar">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <!-- User Balance Info (under logo) -->
+    {% if request.user.is_authenticated %}
+      <div class="sidebar-balance-info">
+        <div class="balance-item">
+          <span class="balance-label">الرصيد:</span>
+          <span class="balance-value text-warning">${{ request.user.userprofile.balance }}</span>
+        </div>
+        <div class="balance-item">
+          <span class="balance-label">المستوى:</span>
+          <span class="balance-value text-warning">{{ request.user.userprofile.level }}</span>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar-nav">
+    <ul class="sidebar-menu">
+      
+      <!-- Home -->
+      <li class="sidebar-item">
+        <a class="sidebar-link {% if '/' == request.path %}active{% endif %}" href="{% url 'index' %}">
+          <i class="fas fa-home sidebar-icon"></i>
+          <span class="sidebar-text">الرئيسية</span>
+        </a>
+      </li>
+
+      <!-- Products Dropdown -->
+      <li class="sidebar-item sidebar-dropdown">
+        <a class="sidebar-link {% if 'packages' in request.path or 'products' in request.path %}active{% endif %}" href="{% url 'products' %}" >
+          <i class="fas fa-shopping-bag sidebar-icon" ></i>
+          <span class="sidebar-text"  >المنتجات</span>
+          <!-- <i class="fas fa-chevron-down sidebar-arrow"></i> -->
+        </a>
+        <!-- <ul class="sidebar-submenu collapse" id="productsSubmenu">
+          <li><a class="sidebar-submenu-link" href="{% url 'products' %}">جميع المنتجات</a></li>
+          <li><hr class="sidebar-divider"></li>
+          <li><h6 class="sidebar-submenu-header">التصنيفات</h6></li>
+          <li><a class="sidebar-submenu-link" href="{% url 'products' %}?category=3"><i class="fas fa-gamepad me-2"></i>ألعاب</a></li>
+          <li><a class="sidebar-submenu-link" href="{% url 'products' %}?category=2"><i class="fas fa-mobile-alt me-2"></i>تطبيقات</a></li>
+          <li><a class="sidebar-submenu-link" href="{% url 'products' %}?category=4"><i class="fas fa-dollar-sign me-2"></i>رصيد</a></li>
+          <li><a class="sidebar-submenu-link" href="{% url 'products' %}?category=5"><i class="fas fa-credit-card me-2"></i>بطاقات</a></li>
+          <li><a class="sidebar-submenu-link" href="{% url 'products' %}?category=6"><i class="fab fa-bitcoin me-2"></i>عملات رقمية</a></li>
+        </ul> -->
+      </li>
+
+      <!-- User Section Dropdown -->
+      <li class="sidebar-item sidebar-dropdown">
+        <a class="sidebar-link {% if 'signin' in request.path or 'signup' in request.path or 'profile' in request.path %}active{% endif %}" href="#" data-bs-toggle="collapse" data-bs-target="#userSubmenu" aria-expanded="false">
+          {% if request.user.is_authenticated %}
+            <i class="fas fa-user-circle sidebar-icon"></i>
+            <span class="sidebar-text">الأقسام</span>
+          {% else %}
+            <i class="fas fa-sign-in-alt sidebar-icon"></i>
+            <span class="sidebar-text">تسجيل الدخول</span>
+          {% endif %}
+          <i class="fas fa-chevron-down sidebar-arrow"></i>
+        </a>
+        <ul class="sidebar-submenu collapse" id="userSubmenu">
+          {% if request.user.is_authenticated %}
+            <li><a class="sidebar-submenu-link" href="{% url 'profile' %}"><i class="fas fa-user me-2"></i>ملفي الشخصي {{request.user}}</a></li>
+            <li><a class="sidebar-submenu-link" href="{% url 'show_orders' %}"><i class="fas fa-clipboard-list me-2"></i>طلباتي</a></li>
+            <li><a class="sidebar-submenu-link" href="{% url 'balance_history' %}"><i class="fas fa-wallet me-2"></i>رصيدي</a></li>
+            <li><a class="sidebar-submenu-link" href="{% url 'send_money' %}"><i class="fas fa-paper-plane me-2"></i>إرسال دفعة</a></li>
+            <li><hr class="sidebar-divider"></li>
+            <li><a class="sidebar-submenu-link text-danger" href="{% url 'signout' %}"><i class="fas fa-sign-out-alt me-2"></i>تسجيل الخروج</a></li>
+          {% else %}
+            <li><a class="sidebar-submenu-link" href="{% url 'signin' %}"><i class="fas fa-sign-in-alt me-2"></i>تسجيل الدخول</a></li>
+            <li><a class="sidebar-submenu-link" href="{% url 'signup' %}"><i class="fas fa-user-plus me-2"></i>إنشاء حساب</a></li>
+          {% endif %}
+        </ul>
+      </li>
+
+      <!-- Terms -->
+      <li class="sidebar-item">
+        <a class="sidebar-link {% if '/terms' == request.path %}active{% endif %}" href="{% url 'terms' %}">
+          <i class="fas fa-file-contract sidebar-icon"></i>
+          <span class="sidebar-text">الشروط</span>
+        </a>
+      </li>
+
+      <!-- About -->
+      <li class="sidebar-item">
+        <a class="sidebar-link {% if '/about' == request.path %}active{% endif %}" href="{% url 'about' %}">
+          <i class="fas fa-info-circle sidebar-icon"></i>
+          <span class="sidebar-text">عن الموقع</span>
+        </a>
+      </li>
+
+      <!-- Notifications -->
+      <li class="sidebar-item">
+        <a class="sidebar-link" href="{% url 'notifications' %}">
+          <i class="fas fa-bell sidebar-icon"></i>
+          <span class="sidebar-text">الإشعارات</span>
+          {% if unread_notifications_count > 0 %}
+            <span class="sidebar-badge">{{ unread_notifications_count }}</span>
+          {% endif %}
+        </a>
+      </li>
+
+      <!-- Language Switch -->
+      <li class="sidebar-item sidebar-dropdown">
+        <a class="sidebar-link" href="#" data-bs-toggle="collapse" data-bs-target="#langSubmenu" aria-expanded="false">
+          <i class="fas fa-globe sidebar-icon"></i>
+          <span class="sidebar-text">اللغة</span>
+          <i class="fas fa-chevron-down sidebar-arrow"></i>
+        </a>
+        <ul class="sidebar-submenu collapse" id="langSubmenu">
+          <li><a class="sidebar-submenu-link" href="#" onclick="changeLanguage('en')"><i class="flag-icon flag-icon-us me-2"></i>English</a></li>
+          <li><a class="sidebar-submenu-link" href="#" onclick="changeLanguage('ar')"><i class="flag-icon flag-icon-sa me-2"></i>العربية</a></li>
+          <li><a class="sidebar-submenu-link" href="#" onclick="changeLanguage('tr')"><i class="flag-icon flag-icon-tr me-2"></i>Türkçe</a></li>
+        </ul>
+      </li>
+
+    </ul>
+  </nav>
+</aside>
+
+<!-- Sidebar Overlay (for mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Mobile Menu Toggle Button -->
+<button class="mobile-menu-toggle d-lg-none" id="mobileMenuToggle" aria-label="Open sidebar">
+  <i class="fas fa-bars"></i>
+</button>
+

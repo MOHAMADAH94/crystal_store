@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load discount_tags %}
+
+{% block title %} Package Detail{% endblock %}
+{% block contents %}
+
+<div class="my-form container p-5 my-5 rounded border border-primary">
+    <form name="frmaddtocart" action="{% url 'add_to_cart' package.id %}" id="frmaddtocart" method="POST">
+        {% csrf_token %}
+        <h2 style="font-weight: bold; color: var(--accent-cyan);" class="text-center">تفاصيل الباقة</h2>
+        <hr style="border-color: var(--silver-light);">
+        {% include 'partials/_alerts.html' %}
+
+        <section>
+            <div class="row px-3">
+                <div class="card mb-3 w-100 border-primary" style="background-color: var(--bg-card); border-color: var(--silver-light) !important;">
+                    <div class="row g-0">
+                        <div class="col-md-12">
+                            <div class="card-body">
+                                <h5 class="card-title" style="color: var(--accent-cyan);">{{ package.name }}</h5>
+                                <hr style="border-color: var(--silver-light);">
+
+                                <!-- Quantity Display -->
+                                <div class="mb-3">
+                                    <label class="form-label" style="color: var(--accent-cyan);">الكمية</label>
+                                    {% if package.is_custom %}
+                                        {% if package.product.allow_decimal_qty %}
+                                            <input type="number" class="form-control border-primary" id="inputQuantity" name="quantity" 
+                                                   min="0.0001" step="0.0001" required
+                                                   value="{{ package.quantity }}">
+                                            <small class="form-text text-muted">يمكنك إدخال كمية عشرية (مثال: 1.5 أو 2.75)</small>
+                                        {% else %}
+                                            <input type="number" class="form-control border-primary" id="inputQuantity" name="quantity" 
+                                                   min="1" step="1" required
+                                                   value="{{ package.quantity }}">
+                                        {% endif %}
+                                    {% else %}
+                                        <p class="form-control-plaintext fw-bold" style="color: var(--text-primary);">{{ package.quantity }}</p>
+                                        <input type="hidden" name="quantity" value="{{ package.quantity }}">
+                                    {% endif %}
+                                </div>
+                                <hr style="border-color: var(--silver-light);">
+
+                                <p class="card-text" style="color: var(--text-secondary); font-size:14px; white-space: pre-wrap;">{{ package.description }}</p>
+
+                                <p class="card-text mt-3" style="color: var(--accent-cyan);">السعر الإجمالي:</p>
+                                {% if package.is_custom %}
+                                    <span id="totalPrice" class="rounded-circle p-2" style="background-color: var(--accent-cyan); color: var(--bg-primary);">
+                                        {{ package.calculate_custom_price|format_price:request.user }}
+                                    </span>
+                                {% else %}
+                                    <span id="totalPrice" class="rounded-circle p-2" style="background-color: var(--accent-cyan); color: var(--bg-primary);">
+                                        {{ package|increased_price:request.user|format_price:request.user }}
+                                    </span>
+                                {% endif %}
+
+                                <p id="priceDetails" class="mt-2" style="color: var(--text-muted);">
+                                    (سعر الوحدة: <span id="unitPrice">{{ package.product.coins_price|default:0|format_price:request.user }}</span>,
+                                    الكمية: <span id="quantityDisplay">{{ package.quantity }}</span>)
+                                </p>
+
+                                <hr style="border-color: var(--silver-light);">
+
+                                <!-- Action Buttons -->
+                                <div class="d-flex flex-wrap gap-2 mt-4">
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                        اضافة إلى السلة
+                                    </button>
+
+                                    <a href="{% url 'cart' %}" class="btn btn-outline-primary">عربة التسوق</a>
+
+                                    <a href="{% url 'favorite_package' pack_id=package.id %}"
+                                    class="btn {% if request.user.is_authenticated and package in request.user.userprofile.favorite_package.all %}btn-secondary{% else %}btn-outline-primary{% endif %} ms-auto">
+                                        <i class="bi {% if request.user.is_authenticated and package in request.user.userprofile.favorite_package.all %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                                        {% if request.user.is_authenticated and package in request.user.userprofile.favorite_package.all %}
+                                            إزالة من المفضلة
+                                        {% else %}
+                                            إضافة للمفضلة
+                                        {% endif %}
+                                    </a>
+
+                                </div>
+
+                                <!-- Hidden fields -->
+                                <!-- <input type="hidden" id="priceInput" name="price" value="{% if package.is_custom %}{{ package.calculate_custom_price }}{% else %}{{ package.price }}{% endif %}"> -->
+
+                                <input type="hidden" id="priceInput" value="{% if package.is_custom %}{{ package.calculate_custom_price }}{% else %}{{ package.price }}{% endif %}">
+                                <input type="hidden" name="pack_id" value="{{ package.id }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Confirmation Modal -->
+        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+             aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--silver-light);">
+                    <div class="modal-header" style="background-color: var(--bg-tertiary); border-bottom: 1px solid var(--silver-light);">
+                        <h5 class="modal-title" id="staticBackdropLabel" style="color: var(--accent-cyan);">تأكيد الطلب</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1); opacity: 0.8;"></button>
+                    </div>
+                    <div class="modal-body" style="background-color: var(--bg-card); color: var(--text-primary);">
+                        <div class="mb-3">
+                            <label for="inputPlayerId" class="form-label" style="color: var(--text-primary);">
+        {{ package.product.category.input_label|default:"أدخل المعرف الخاص بك" }}
+    </label>
+
+    <input type="text" class="form-control border-primary" id="inputPlayerId" name="gamer_id"
+           placeholder="{{ package.product.category.input_placeholder|default:'مثال: my_id' }}"
+           required>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="background-color: var(--bg-tertiary); border-top: 1px solid var(--silver-light);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="submit" class="btn btn-primary">تأكيد الطلب</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- JavaScript for calculating price -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var quantityInput = document.getElementById('inputQuantity');
+    var totalPriceSpan = document.getElementById('totalPrice');
+    var quantityDisplay = document.getElementById('quantityDisplay');
+    var priceInput = document.getElementById('priceInput');
+    
+    // Get user currency
+    const userCurrency = '{{ request.user.userprofile.currency|default:"USD" }}';
+    const currencySymbol = userCurrency === 'SYP' ? 'SYP' : '$';
+    {% if request.user.userprofile.currency == "SYP" %}
+    const exchangeRate = parseFloat('{{ exchange_rate|default:15000 }}');
+    {% else %}
+    const exchangeRate = 1;
+    {% endif %}
+
+    // التحقق من السماح بالكمية العشرية
+    var allowDecimalQty = {% if package.product.allow_decimal_qty %}true{% else %}false{% endif %};
+    
+    if (quantityInput) {
+        quantityInput.addEventListener('input', function () {
+            var quantity = parseFloat(this.value) || 0;
+            // التأكد من أن الكمية أكبر من 0
+            if (quantity < 0) {
+                quantity = 0;
+                this.value = 0;
+            }
+            
+            var coinsPrice = parseFloat("{{ package.product.coins_price|default:0 }}");
+            var totalPriceUsd = quantity * coinsPrice;
+            
+            // Convert to user currency if needed
+            var totalPrice = userCurrency === 'SYP' ? (totalPriceUsd * exchangeRate).toFixed(2) : totalPriceUsd.toFixed(4);
+
+            totalPriceSpan.innerText = currencySymbol + totalPrice;
+            if (quantityDisplay) {
+                // عرض الكمية بشكل صحيح (عشري أو صحيح)
+                if (allowDecimalQty) {
+                    quantityDisplay.innerText = quantity.toFixed(4);
+                } else {
+                    quantityDisplay.innerText = Math.round(quantity);
+                }
+            }
+            priceInput.value = totalPriceUsd.toFixed(4); // Always store in USD
+        });
+    }
+});
+</script>
+
+{% endblock %}

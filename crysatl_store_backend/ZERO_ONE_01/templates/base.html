@@ -1,0 +1,186 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- ✅ Bootstrap 5.3.3 + RTL -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-rtl@5.3.3/dist/css/bootstrap-rtl.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts - Tajawal -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/pretty-checkbox.min.css' %}">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="{% static 'img/mylogo.png' %}">
+    
+    <title>Crystal | {% block title %}{% endblock %}</title>
+    
+    <style>
+        :root {
+            /* White, Purple, Silver Color Palette with Gradients */
+            --purple: #7C3AED;              /* Purple */
+            --purple-light: #8B5CF6;        /* Light Purple */
+            --purple-lighter: #A78BFA;      /* Lighter Purple */
+            --white: #FFFFFF;               /* White */
+            --silver: #E5E7EB;              /* Silver */
+            --silver-medium: #9CA3AF;        /* Medium Silver */
+            --silver-dark: #6B7280;          /* Dark Silver */
+            --light-bg: #F9FAFB;            /* Light Background */
+            --text-dark: #1F2937;           /* Dark Text */
+            --text-medium: #6B7280;         /* Medium Text */
+            --text-light: #9CA3AF;          /* Light Text */
+            --border-color: #E5E7EB;        /* Border Color */
+            
+            /* Backgrounds */
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --bg-card: #FFFFFF;
+            --bg-hover: #F3F4F6;
+            
+            /* Text Colors */
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            
+            /* Accent Colors */
+            --accent-primary: #7C3AED;      /* Purple */
+            --accent-secondary: #8B5CF6;    /* Light Purple */
+            --accent-tertiary: #A78BFA;     /* Lighter Purple */
+            --accent-error: #EF4444;
+            --accent-success: #10B981;
+            --accent-warning: #F59E0B;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+
+    {% include 'partials/_sidebar.html' %}
+
+    <main class="flex-shrink-0">
+
+
+        <!-- ✅ محتوى الصفحة -->
+        {% block contents %}{% endblock %}
+
+    </main>
+
+    {% include 'partials/_footer.html' %}
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{% static 'js/language-switch.js' %}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Popovers
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+            var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+                return new bootstrap.Popover(popoverTriggerEl);
+            });
+
+            // Modal focus
+            const modal = document.getElementById('staticBackdrop');
+            if (modal) {
+                modal.addEventListener('shown.bs.modal', function () {
+                    const input = modal.querySelector('#inputPlayerId');
+                    if (input) input.focus();
+                });
+            }
+
+            // Set current year
+            const yearSpans = document.querySelectorAll('.year');
+            yearSpans.forEach(span => {
+                span.textContent = new Date().getFullYear();
+            });
+
+            // Smooth scrolling
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+
+            // Auto-hide alerts
+            setTimeout(() => {
+                document.querySelectorAll('.alert').forEach(alert => {
+                    const instance = bootstrap.Alert.getOrCreateInstance(alert);
+                    instance.close();
+                });
+            }, 3000);
+
+            // Sidebar Toggle for Mobile
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+            function openSidebar() {
+                if (sidebar) sidebar.classList.add('active');
+                if (sidebarOverlay) sidebarOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeSidebar() {
+                if (sidebar) sidebar.classList.remove('active');
+                if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', openSidebar);
+            }
+
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', closeSidebar);
+            }
+
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', closeSidebar);
+            }
+
+            // Close sidebar when clicking on a link (mobile only)
+            if (window.innerWidth <= 991) {
+                const sidebarLinks = document.querySelectorAll('.sidebar-link, .sidebar-submenu-link');
+                sidebarLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        setTimeout(closeSidebar, 300);
+                    });
+                });
+            }
+
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 991) {
+                    closeSidebar();
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>
